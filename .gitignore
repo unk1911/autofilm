@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Data/model files (large binaries)
+data/embeddings.npz
+data/features.npz
+data/nn_features.npz
+data/nn_vocab.npz
+data/recommendation_model.pt
+data/tmdb_cache.db
+
+# Playwright MCP logs
+.playwright-mcp/
+
+# Env / secrets
+.env
+*.env
+config.local.*
+
+# OS
+.DS_Store
+Thumbs.db
