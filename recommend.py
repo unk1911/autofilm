@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
 """
-sim-film — personal movie recommendation engine
+autofilm — personal movie recommendation engine
 
 Usage:
   python recommend.py setup   [--limit N]   Download catalog + fetch TMDB metadata
   python recommend.py ingest  [--csv]       Import your Letterboxd ratings
   python recommend.py build                 Rebuild feature matrix from cache
+  python recommend.py train                 Rebuild embeddings (re-run after new ratings)
   python recommend.py run     [--top N]     Show top N recommendations (default 20)
+  python recommend.py add     <title> <year> <rating 1-10>  Add a single film manually
+
+Examples:
+  python recommend.py add "Dogville" "2003" 10
+  python recommend.py run --top 40
 
 First-time setup:
   1. Get a free TMDB API key: https://www.themoviedb.org/settings/api
   2. export TMDB_API_KEY=your_key
   3. python recommend.py setup              (downloads ~330 MB, then fetches metadata)
   4. python recommend.py ingest             (scrapes your Letterboxd profile)
-  5. python recommend.py run                (prints recommendations)
+  5. python recommend.py train              (builds embeddings)
+  6. python recommend.py run                (prints recommendations)
 """
 import sys
 import json
