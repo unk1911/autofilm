@@ -1,0 +1,486 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <!-- Isometric grid transform helpers -->
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="3" dy="3" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+    <filter id="shadowDeep" x="-5%" y="-5%" width="120%" height="120%">
+      <feDropShadow dx="4" dy="5" stdDeviation="5" flood-opacity="0.2"/>
+    </filter>
+    <linearGradient id="gTopBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="gRightBlue" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="gLeftBlue" x1="1" y1="0" x2="0" y2="0.5">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="gTopGreen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6ee7b7"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="gRightGreen" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="gLeftGreen" x1="1" y1="0" x2="0" y2="0.5">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="gTopPurple" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="gRightPurple" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="gLeftPurple" x1="1" y1="0" x2="0" y2="0.5">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="gTopAmber" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="gRightAmber" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="gLeftAmber" x1="1" y1="0" x2="0" y2="0.5">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="gTopRose" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fda4af"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+    <linearGradient id="gRightRose" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#be123c"/>
+    </linearGradient>
+    <linearGradient id="gLeftRose" x1="1" y1="0" x2="0" y2="0.5">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+    <linearGradient id="gTopSlate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    <linearGradient id="gRightSlate" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="gLeftSlate" x1="1" y1="0" x2="0" y2="0.5">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <!-- Arrow marker -->
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
+    </marker>
+    <marker id="arrowAmber" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="900" fill="url(#bgGrad)" rx="0"/>
+
+  <!-- Subtle grid -->
+  <g opacity="0.04" stroke="#94a3b8" stroke-width="0.5">
+    <line x1="0" y1="0" x2="600" y2="900"/>
+    <line x1="200" y1="0" x2="800" y2="900"/>
+    <line x1="400" y1="0" x2="1000" y2="900"/>
+    <line x1="600" y1="0" x2="1200" y2="900"/>
+    <line x1="800" y1="0" x2="1200" y2="600"/>
+    <line x1="1000" y1="0" x2="1200" y2="300"/>
+    <line x1="1200" y1="0" x2="600" y2="900"/>
+    <line x1="1000" y1="0" x2="400" y2="900"/>
+    <line x1="800" y1="0" x2="200" y2="900"/>
+    <line x1="600" y1="0" x2="0" y2="900"/>
+    <line x1="400" y1="0" x2="0" y2="600"/>
+    <line x1="200" y1="0" x2="0" y2="300"/>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="45" text-anchor="middle" fill="#f8fafc" font-size="28" font-weight="700" letter-spacing="2">autofilm</text>
+  <text x="600" y="68" text-anchor="middle" fill="#94a3b8" font-size="13" letter-spacing="1">PERSONAL MOVIE RECOMMENDATION ENGINE — ARCHITECTURE</text>
+
+  <!-- ============================================================ -->
+  <!-- LAYER 1: EXTERNAL DATA SOURCES (top row, isometric blocks)   -->
+  <!-- ============================================================ -->
+
+  <!-- MovieLens block -->
+  <g transform="translate(70, 110)" filter="url(#shadow)">
+    <!-- top face -->
+    <polygon points="75,0 150,22 75,44 0,22" fill="url(#gTopBlue)" opacity="0.9"/>
+    <!-- left face -->
+    <polygon points="0,22 75,44 75,84 0,62" fill="url(#gLeftBlue)" opacity="0.9"/>
+    <!-- right face -->
+    <polygon points="150,22 75,44 75,84 150,62" fill="url(#gRightBlue)" opacity="0.9"/>
+    <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">MovieLens</text>
+    <text x="75" y="42" text-anchor="middle" fill="#dbeafe" font-size="8">~62k films</text>
+  </g>
+
+  <!-- TMDB API block -->
+  <g transform="translate(280, 110)" filter="url(#shadow)">
+    <polygon points="75,0 150,22 75,44 0,22" fill="url(#gTopGreen)" opacity="0.9"/>
+    <polygon points="0,22 75,44 75,84 0,62" fill="url(#gLeftGreen)" opacity="0.9"/>
+    <polygon points="150,22 75,44 75,84 150,62" fill="url(#gRightGreen)" opacity="0.9"/>
+    <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">TMDB API</text>
+    <text x="75" y="42" text-anchor="middle" fill="#d1fae5" font-size="8">metadata + search</text>
+  </g>
+
+  <!-- Letterboxd block -->
+  <g transform="translate(490, 110)" filter="url(#shadow)">
+    <polygon points="75,0 150,22 75,44 0,22" fill="url(#gTopAmber)" opacity="0.9"/>
+    <polygon points="0,22 75,44 75,84 0,62" fill="url(#gLeftAmber)" opacity="0.9"/>
+    <polygon points="150,22 75,44 75,84 150,62" fill="url(#gRightAmber)" opacity="0.9"/>
+    <text x="75" y="30" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Letterboxd</text>
+    <text x="75" y="42" text-anchor="middle" fill="#fef3c7" font-size="8">RSS / CSV export</text>
+  </g>
+
+  <!-- Prestige Lists block -->
+  <g transform="translate(700, 110)" filter="url(#shadow)">
+    <polygon points="75,0 150,22 75,44 0,22" fill="url(#gTopRose)" opacity="0.9"/>
+    <polygon points="0,22 75,44 75,84 0,62" fill="url(#gLeftRose)" opacity="0.9"/>
+    <polygon points="150,22 75,44 75,84 150,62" fill="url(#gRightRose)" opacity="0.9"/>
+    <text x="75" y="28" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Prestige Lists</text>
+    <text x="75" y="40" text-anchor="middle" fill="#ffe4e6" font-size="7">S&amp;S · TSPDT · Criterion</text>
+    <text x="75" y="50" text-anchor="middle" fill="#ffe4e6" font-size="7">· Ebert Great Movies</text>
+  </g>
+
+  <!-- User Input block -->
+  <g transform="translate(910, 110)" filter="url(#shadow)">
+    <polygon points="75,0 150,22 75,44 0,22" fill="url(#gTopPurple)" opacity="0.9"/>
+    <polygon points="0,22 75,44 75,84 0,62" fill="url(#gLeftPurple)" opacity="0.9"/>
+    <polygon points="150,22 75,44 75,84 150,62" fill="url(#gRightPurple)" opacity="0.9"/>
+    <text x="75" y="28" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Manual Input</text>
+    <text x="75" y="40" text-anchor="middle" fill="#ede9fe" font-size="8">add / del / list</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LAYER 1 → LAYER 2 arrows                                    -->
+  <!-- ============================================================ -->
+
+  <!-- MovieLens → catalog.py -->
+  <line x1="145" y1="195" x2="220" y2="258" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow)"/>
+  <!-- TMDB API → tmdb.py -->
+  <line x1="355" y1="195" x2="380" y2="258" stroke="#34d399" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowGreen)"/>
+  <!-- Letterboxd → letterboxd.py -->
+  <line x1="565" y1="195" x2="540" y2="258" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowAmber)"/>
+  <!-- Prestige → prestige.py -->
+  <line x1="775" y1="195" x2="720" y2="258" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow)"/>
+  <!-- User → recommend.py -->
+  <line x1="985" y1="195" x2="880" y2="258" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowPurple)"/>
+
+  <!-- ============================================================ -->
+  <!-- LAYER 2: INGESTION & PROCESSING (src/ modules)               -->
+  <!-- ============================================================ -->
+
+  <!-- Big isometric platform for the processing layer -->
+  <g transform="translate(60, 245)">
+    <!-- Platform top face -->
+    <polygon points="520,0 1040,80 520,160 0,80" fill="#1e293b" stroke="#334155" stroke-width="1" opacity="0.7"/>
+    <!-- Platform left face -->
+    <polygon points="0,80 520,160 520,185 0,105" fill="#0f172a" stroke="#334155" stroke-width="0.5" opacity="0.7"/>
+    <!-- Platform right face -->
+    <polygon points="1040,80 520,160 520,185 1040,105" fill="#0f172a" stroke="#334155" stroke-width="0.5" opacity="0.7"/>
+  </g>
+
+  <!-- Module: catalog.py -->
+  <g transform="translate(120, 270)" filter="url(#shadow)">
+    <rect x="0" y="0" width="130" height="50" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="65" y="20" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="600">catalog.py</text>
+    <text x="65" y="33" text-anchor="middle" fill="#64748b" font-size="8">download_movielens()</text>
+    <text x="65" y="43" text-anchor="middle" fill="#64748b" font-size="8">fetch_all_metadata()</text>
+  </g>
+
+  <!-- Module: tmdb.py -->
+  <g transform="translate(290, 270)" filter="url(#shadow)">
+    <rect x="0" y="0" width="130" height="50" rx="6" fill="#134e4a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="65" y="20" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="600">tmdb.py</text>
+    <text x="65" y="33" text-anchor="middle" fill="#64748b" font-size="8">TMDBClient</text>
+    <text x="65" y="43" text-anchor="middle" fill="#64748b" font-size="8">SQLite cache layer</text>
+  </g>
+
+  <!-- Module: letterboxd.py -->
+  <g transform="translate(460, 270)" filter="url(#shadow)">
+    <rect x="0" y="0" width="130" height="50" rx="6" fill="#451a03" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="65" y="20" text-anchor="middle" fill="#fcd34d" font-size="10" font-weight="600">letterboxd.py</text>
+    <text x="65" y="33" text-anchor="middle" fill="#64748b" font-size="8">scrape_ratings()</text>
+    <text x="65" y="43" text-anchor="middle" fill="#64748b" font-size="8">read_csv_export()</text>
+  </g>
+
+  <!-- Module: prestige.py -->
+  <g transform="translate(630, 270)" filter="url(#shadow)">
+    <rect x="0" y="0" width="130" height="50" rx="6" fill="#4c0519" stroke="#fb7185" stroke-width="1.5"/>
+    <text x="65" y="20" text-anchor="middle" fill="#fda4af" font-size="10" font-weight="600">prestige.py</text>
+    <text x="65" y="33" text-anchor="middle" fill="#64748b" font-size="8">prestige_score()</text>
+    <text x="65" y="43" text-anchor="middle" fill="#64748b" font-size="8">1.0x – 2.0x boost</text>
+  </g>
+
+  <!-- Module: config.py -->
+  <g transform="translate(810, 270)" filter="url(#shadow)">
+    <rect x="0" y="0" width="130" height="50" rx="6" fill="#27272a" stroke="#71717a" stroke-width="1.5"/>
+    <text x="65" y="20" text-anchor="middle" fill="#a1a1aa" font-size="10" font-weight="600">config.py</text>
+    <text x="65" y="33" text-anchor="middle" fill="#64748b" font-size="8">paths · thresholds</text>
+    <text x="65" y="43" text-anchor="middle" fill="#64748b" font-size="8">locale boosts · vocab</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LAYER 3: STORAGE (isometric cylinders / blocks)              -->
+  <!-- ============================================================ -->
+
+  <text x="600" y="370" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="3">STORAGE</text>
+
+  <!-- SQLite cache (cylinder-ish) -->
+  <g transform="translate(80, 390)" filter="url(#shadow)">
+    <rect x="0" y="10" width="120" height="55" rx="4" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+    <ellipse cx="60" cy="10" rx="60" ry="10" fill="#2563eb" stroke="#60a5fa" stroke-width="1"/>
+    <ellipse cx="60" cy="65" rx="60" ry="10" fill="none" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="60" y="38" text-anchor="middle" fill="#93c5fd" font-size="9" font-weight="600">tmdb_cache.db</text>
+    <text x="60" y="50" text-anchor="middle" fill="#64748b" font-size="7">~85k films · SQLite</text>
+  </g>
+
+  <!-- ratings.json -->
+  <g transform="translate(250, 390)" filter="url(#shadow)">
+    <rect x="0" y="10" width="120" height="55" rx="4" fill="#451a03" stroke="#fbbf24" stroke-width="1"/>
+    <ellipse cx="60" cy="10" rx="60" ry="10" fill="#d97706" stroke="#fbbf24" stroke-width="1"/>
+    <ellipse cx="60" cy="65" rx="60" ry="10" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="60" y="38" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="600">ratings.json</text>
+    <text x="60" y="50" text-anchor="middle" fill="#64748b" font-size="7">TMDB ID → score 1-10</text>
+  </g>
+
+  <!-- embeddings.npz -->
+  <g transform="translate(420, 390)" filter="url(#shadow)">
+    <rect x="0" y="10" width="120" height="55" rx="4" fill="#312e81" stroke="#818cf8" stroke-width="1"/>
+    <ellipse cx="60" cy="10" rx="60" ry="10" fill="#4f46e5" stroke="#818cf8" stroke-width="1"/>
+    <ellipse cx="60" cy="65" rx="60" ry="10" fill="none" stroke="#818cf8" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="60" y="38" text-anchor="middle" fill="#c7d2fe" font-size="9" font-weight="600">embeddings.npz</text>
+    <text x="60" y="50" text-anchor="middle" fill="#64748b" font-size="7">384-dim vectors</text>
+  </g>
+
+  <!-- prestige_index.json -->
+  <g transform="translate(590, 390)" filter="url(#shadow)">
+    <rect x="0" y="10" width="120" height="55" rx="4" fill="#4c0519" stroke="#fb7185" stroke-width="1"/>
+    <ellipse cx="60" cy="10" rx="60" ry="10" fill="#be123c" stroke="#fb7185" stroke-width="1"/>
+    <ellipse cx="60" cy="65" rx="60" ry="10" fill="none" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="60" y="38" text-anchor="middle" fill="#fda4af" font-size="9" font-weight="600">prestige_index.json</text>
+    <text x="60" y="50" text-anchor="middle" fill="#64748b" font-size="7">TMDB ID → 1.0–2.0</text>
+  </g>
+
+  <!-- features.npz (legacy) -->
+  <g transform="translate(760, 390)" filter="url(#shadow)">
+    <rect x="0" y="10" width="120" height="55" rx="4" fill="#1c1917" stroke="#57534e" stroke-width="1" stroke-dasharray="4,2"/>
+    <ellipse cx="60" cy="10" rx="60" ry="10" fill="#44403c" stroke="#57534e" stroke-width="1" stroke-dasharray="4,2"/>
+    <ellipse cx="60" cy="65" rx="60" ry="10" fill="none" stroke="#57534e" stroke-width="1" stroke-dasharray="4,2"/>
+    <text x="60" y="35" text-anchor="middle" fill="#a8a29e" font-size="9" font-weight="600">features.npz</text>
+    <text x="60" y="47" text-anchor="middle" fill="#78716c" font-size="7">legacy sparse</text>
+    <text x="60" y="57" text-anchor="middle" fill="#78716c" font-size="7">IDF vectors</text>
+  </g>
+
+  <!-- nn model (legacy) -->
+  <g transform="translate(930, 390)" filter="url(#shadow)">
+    <rect x="0" y="10" width="120" height="55" rx="4" fill="#1c1917" stroke="#57534e" stroke-width="1" stroke-dasharray="4,2"/>
+    <ellipse cx="60" cy="10" rx="60" ry="10" fill="#44403c" stroke="#57534e" stroke-width="1" stroke-dasharray="4,2"/>
+    <ellipse cx="60" cy="65" rx="60" ry="10" fill="none" stroke="#57534e" stroke-width="1" stroke-dasharray="4,2"/>
+    <text x="60" y="35" text-anchor="middle" fill="#a8a29e" font-size="9" font-weight="600">nn_model.pt</text>
+    <text x="60" y="47" text-anchor="middle" fill="#78716c" font-size="7">legacy PyTorch</text>
+    <text x="60" y="57" text-anchor="middle" fill="#78716c" font-size="7">±20% blend</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LAYER 4: EMBEDDING ENGINE (the big centerpiece)              -->
+  <!-- ============================================================ -->
+
+  <!-- Isometric block for embedding engine -->
+  <g transform="translate(140, 500)" filter="url(#shadowDeep)">
+    <!-- Top face -->
+    <polygon points="200,0 400,35 200,70 0,35" fill="#312e81" stroke="#6366f1" stroke-width="1.5"/>
+    <!-- Left face -->
+    <polygon points="0,35 200,70 200,130 0,95" fill="#1e1b4b" stroke="#6366f1" stroke-width="0.5"/>
+    <!-- Right face -->
+    <polygon points="400,35 200,70 200,130 400,95" fill="#252262" stroke="#6366f1" stroke-width="0.5"/>
+
+    <text x="200" y="42" text-anchor="middle" fill="#e0e7ff" font-size="12" font-weight="700">embeddings.py</text>
+    <text x="200" y="56" text-anchor="middle" fill="#a5b4fc" font-size="9">Sentence Transformer</text>
+    <text x="200" y="68" text-anchor="middle" fill="#818cf8" font-size="8">paraphrase-multilingual-MiniLM-L12-v2</text>
+  </g>
+
+  <!-- Text composition detail box -->
+  <g transform="translate(600, 495)" filter="url(#shadow)">
+    <rect x="0" y="0" width="250" height="120" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="125" y="18" text-anchor="middle" fill="#e2e8f0" font-size="10" font-weight="600">Film Text Composition</text>
+    <line x1="15" y1="25" x2="235" y2="25" stroke="#334155" stroke-width="0.5"/>
+    <text x="20" y="40" fill="#93c5fd" font-size="8" font-family="monospace">"Mulholland Drive</text>
+    <text x="20" y="52" fill="#6ee7b7" font-size="8" font-family="monospace"> Genres: Thriller, Drama, Mystery.</text>
+    <text x="20" y="64" fill="#fcd34d" font-size="8" font-family="monospace"> Directed by David Lynch.</text>
+    <text x="20" y="76" fill="#e2e8f0" font-size="8" font-family="monospace"> After a car wreck on the...</text>
+    <text x="20" y="88" fill="#fda4af" font-size="8" font-family="monospace"> Keywords: hollywood, dream...</text>
+    <text x="20" y="100" fill="#a78bfa" font-size="8" font-family="monospace"> Country: US, FR. Lang: en.</text>
+    <text x="20" y="112" fill="#94a3b8" font-size="8" font-family="monospace"> Year: 2001."</text>
+  </g>
+
+  <!-- Arrow from composition to embedding -->
+  <line x1="600" y1="555" x2="545" y2="555" stroke="#818cf8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="572" y="549" text-anchor="middle" fill="#64748b" font-size="7">encode</text>
+
+  <!-- Arrow from embedding output to embeddings.npz -->
+  <line x1="340" y1="510" x2="440" y2="460" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+
+  <!-- ============================================================ -->
+  <!-- LAYER 5: RECOMMENDATION ENGINE                               -->
+  <!-- ============================================================ -->
+
+  <!-- Big isometric block for recommendation engine -->
+  <g transform="translate(80, 660)" filter="url(#shadowDeep)">
+    <!-- Top face -->
+    <polygon points="300,0 600,45 300,90 0,45" fill="#134e4a" stroke="#10b981" stroke-width="1.5"/>
+    <!-- Left face -->
+    <polygon points="0,45 300,90 300,150 0,105" fill="#042f2e" stroke="#10b981" stroke-width="0.5"/>
+    <!-- Right face -->
+    <polygon points="600,45 300,90 300,150 600,105" fill="#064e3b" stroke="#10b981" stroke-width="0.5"/>
+
+    <text x="300" y="50" text-anchor="middle" fill="#d1fae5" font-size="14" font-weight="700">Recommendation Engine</text>
+    <text x="300" y="68" text-anchor="middle" fill="#6ee7b7" font-size="9">recommend() in embeddings.py</text>
+  </g>
+
+  <!-- Scoring formula box -->
+  <g transform="translate(720, 660)" filter="url(#shadow)">
+    <rect x="0" y="0" width="400" height="145" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="200" y="18" text-anchor="middle" fill="#e2e8f0" font-size="10" font-weight="700">Scoring Pipeline</text>
+    <line x1="15" y1="25" x2="385" y2="25" stroke="#334155" stroke-width="0.5"/>
+
+    <!-- Taste profile -->
+    <text x="20" y="42" fill="#6ee7b7" font-size="9" font-weight="600">Taste Profile:</text>
+    <text x="20" y="55" fill="#94a3b8" font-size="8" font-family="monospace">positive = weighted_mean(9-10 rated)</text>
+    <text x="20" y="66" fill="#94a3b8" font-size="8" font-family="monospace">negative = weighted_mean(1-5 rated)</text>
+    <text x="20" y="77" fill="#e2e8f0" font-size="8" font-family="monospace">profile = pos - 0.8 * neg</text>
+
+    <line x1="15" y1="84" x2="385" y2="84" stroke="#334155" stroke-width="0.5"/>
+
+    <!-- Score formula -->
+    <text x="20" y="99" fill="#fcd34d" font-size="9" font-weight="600">Final Score:</text>
+    <text x="20" y="112" fill="#e2e8f0" font-size="8" font-family="monospace">sim² × quality × obscurity_boost</text>
+    <text x="20" y="123" fill="#e2e8f0" font-size="8" font-family="monospace">  × locale × director × prestige</text>
+    <text x="20" y="134" fill="#e2e8f0" font-size="8" font-family="monospace">  × nn_blend</text>
+
+    <!-- Filters -->
+    <text x="230" y="99" fill="#fb7185" font-size="9" font-weight="600">Filters:</text>
+    <text x="230" y="112" fill="#94a3b8" font-size="8">votes ≥ 300 · TMDB ≥ 7.0</text>
+    <text x="230" y="123" fill="#94a3b8" font-size="8">runtime ≥ 60m · sim ≥ 0.25</text>
+    <text x="230" y="134" fill="#94a3b8" font-size="8">genre cap 40% · genre filter</text>
+  </g>
+
+  <!-- Arrow from engine to scoring -->
+  <line x1="680" y1="740" x2="720" y2="730" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- Arrow: embeddings.npz → engine -->
+  <path d="M 480 460 Q 460 580 420 660" stroke="#818cf8" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+  <text x="468" y="560" fill="#818cf8" font-size="7">load</text>
+
+  <!-- Arrow: ratings.json → engine -->
+  <path d="M 310 460 Q 330 580 360 660" stroke="#fbbf24" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arrowAmber)"/>
+  <text x="312" y="565" fill="#fbbf24" font-size="7">ratings</text>
+
+  <!-- Arrow: prestige_index → engine -->
+  <path d="M 650 460 Q 580 580 500 660" stroke="#fb7185" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+  <text x="590" y="560" fill="#fb7185" font-size="7">prestige</text>
+
+  <!-- ============================================================ -->
+  <!-- OUTPUT arrow                                                 -->
+  <!-- ============================================================ -->
+
+  <!-- Output block -->
+  <g transform="translate(45, 840)" filter="url(#shadow)">
+    <rect x="0" y="0" width="190" height="35" rx="18" fill="#059669" stroke="#34d399" stroke-width="1.5"/>
+    <text x="95" y="15" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">TOP N RECOMMENDATIONS</text>
+    <text x="95" y="27" text-anchor="middle" fill="#d1fae5" font-size="8">ranked, genre-diversified</text>
+  </g>
+
+  <line x1="200" y1="810" x2="160" y2="840" stroke="#34d399" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+  <!-- ============================================================ -->
+  <!-- CLI ENTRYPOINT (right side vertical)                         -->
+  <!-- ============================================================ -->
+
+  <g transform="translate(960, 500)" filter="url(#shadow)">
+    <rect x="0" y="0" width="180" height="260" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+    <text x="90" y="20" text-anchor="middle" fill="#e0e7ff" font-size="11" font-weight="700">recommend.py</text>
+    <text x="90" y="33" text-anchor="middle" fill="#818cf8" font-size="8">CLI entrypoint</text>
+    <line x1="15" y1="40" x2="165" y2="40" stroke="#334155" stroke-width="0.5"/>
+
+    <!-- Commands -->
+    <rect x="15" y="50" width="70" height="20" rx="3" fill="#1e3a5f"/>
+    <text x="50" y="64" text-anchor="middle" fill="#60a5fa" font-size="9" font-weight="600">setup</text>
+
+    <rect x="95" y="50" width="70" height="20" rx="3" fill="#451a03"/>
+    <text x="130" y="64" text-anchor="middle" fill="#fbbf24" font-size="9" font-weight="600">ingest</text>
+
+    <rect x="15" y="80" width="70" height="20" rx="3" fill="#312e81"/>
+    <text x="50" y="94" text-anchor="middle" fill="#818cf8" font-size="9" font-weight="600">train</text>
+
+    <rect x="95" y="80" width="70" height="20" rx="3" fill="#134e4a"/>
+    <text x="130" y="94" text-anchor="middle" fill="#34d399" font-size="9" font-weight="600">run</text>
+
+    <rect x="15" y="110" width="70" height="20" rx="3" fill="#3f3f46"/>
+    <text x="50" y="124" text-anchor="middle" fill="#a1a1aa" font-size="9" font-weight="600">build</text>
+
+    <rect x="95" y="110" width="70" height="20" rx="3" fill="#a78bfa" opacity="0.2"/>
+    <text x="130" y="124" text-anchor="middle" fill="#a78bfa" font-size="9" font-weight="600">add</text>
+
+    <rect x="15" y="140" width="70" height="20" rx="3" fill="#a78bfa" opacity="0.2"/>
+    <text x="50" y="154" text-anchor="middle" fill="#a78bfa" font-size="9" font-weight="600">list</text>
+
+    <rect x="95" y="140" width="70" height="20" rx="3" fill="#a78bfa" opacity="0.2"/>
+    <text x="130" y="154" text-anchor="middle" fill="#a78bfa" font-size="9" font-weight="600">del</text>
+
+    <line x1="15" y1="170" x2="165" y2="170" stroke="#334155" stroke-width="0.5"/>
+
+    <!-- Flow description -->
+    <text x="90" y="186" text-anchor="middle" fill="#94a3b8" font-size="8">Typical workflow:</text>
+    <text x="90" y="200" text-anchor="middle" fill="#60a5fa" font-size="8" font-family="monospace">1. setup</text>
+    <text x="90" y="213" text-anchor="middle" fill="#fbbf24" font-size="8" font-family="monospace">2. ingest / add</text>
+    <text x="90" y="226" text-anchor="middle" fill="#818cf8" font-size="8" font-family="monospace">3. train</text>
+    <text x="90" y="239" text-anchor="middle" fill="#34d399" font-size="8" font-family="monospace">4. run → results</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LEGEND                                                       -->
+  <!-- ============================================================ -->
+
+  <g transform="translate(330, 840)">
+    <rect x="0" y="0" width="340" height="40" rx="6" fill="#0f172a" stroke="#334155" stroke-width="0.5" opacity="0.8"/>
+    <rect x="10" y="10" width="10" height="10" rx="2" fill="#3b82f6"/>
+    <text x="25" y="19" fill="#94a3b8" font-size="8">Catalog</text>
+    <rect x="65" y="10" width="10" height="10" rx="2" fill="#34d399"/>
+    <text x="80" y="19" fill="#94a3b8" font-size="8">API/Engine</text>
+    <rect x="135" y="10" width="10" height="10" rx="2" fill="#fbbf24"/>
+    <text x="150" y="19" fill="#94a3b8" font-size="8">User Data</text>
+    <rect x="200" y="10" width="10" height="10" rx="2" fill="#818cf8"/>
+    <text x="215" y="19" fill="#94a3b8" font-size="8">ML/Embeddings</text>
+    <rect x="290" y="10" width="10" height="10" rx="2" fill="#fb7185"/>
+    <text x="305" y="19" fill="#94a3b8" font-size="8">Prestige</text>
+    <line x1="10" y1="32" x2="40" y2="32" stroke="#57534e" stroke-width="1" stroke-dasharray="4,2"/>
+    <text x="45" y="35" fill="#78716c" font-size="8">= legacy component</text>
+  </g>
+
+  <!-- Subtle branding -->
+  <text x="1170" y="885" text-anchor="end" fill="#334155" font-size="8">autofilm architecture · content-based recommendation</text>
+</svg>
