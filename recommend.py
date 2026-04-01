@@ -9,6 +9,7 @@ Usage:
   python recommend.py train                 Rebuild embeddings (re-run after new ratings)
   python recommend.py run     [--top N]     Show top N recommendations (default 20)
   python recommend.py add     <title> <year> <rating 1-10>  Add a single film manually
+  python recommend.py list                              List all rated films
 
 Examples:
   python recommend.py add "Dogville" "2003" 10
@@ -192,6 +193,39 @@ def cmd_add(args):
     print(f"Total ratings: {len(ratings)}")
 
 
+def cmd_list(args):
+    """List all rated films, sorted by rating descending."""
+    if not RATINGS_FILE.exists():
+        print("No ratings yet. Run: python recommend.py ingest")
+        return
+
+    with open(RATINGS_FILE) as f:
+        ratings = json.load(f)
+
+    from src.tmdb import TMDBClient
+    client = TMDBClient()
+
+    rows = []
+    for tid_str, score in ratings.items():
+        movie = client.get_movie(int(tid_str))
+        if movie:
+            title = movie.get('title', '?')
+            rd = movie.get('release_date', '') or ''
+            year = rd[:4] if len(rd) >= 4 else '????'
+        else:
+            title = f'[TMDB {tid_str}]'
+            year = '????'
+        rows.append((score, title, year))
+
+    rows.sort(key=lambda r: (-r[0], r[2], r[1]))
+
+    print(f"\n  {'#':>3}  {'Score':>5}  {'Year':>4}  Title")
+    print(f"  {'─'*3}  {'─'*5}  {'─'*4}  {'─'*40}")
+    for i, (score, title, year) in enumerate(rows, 1):
+        print(f"  {i:>3}  {score:>4}/10  {year}  {title}")
+    print(f"\n  Total: {len(rows)} films")
+
+
 COMMANDS = {
     'setup':  cmd_setup,
     'ingest': cmd_ingest,
@@ -199,6 +233,7 @@ COMMANDS = {
     'train':  cmd_train,
     'run':    cmd_run,
     'add':    cmd_add,
+    'list':   cmd_list,
 }
 
 
