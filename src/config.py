@@ -23,6 +23,10 @@ PRIORITY_LANGUAGES = {
     'fr': 1.15,  # French
     'ko': 1.20,  # South Korean
     'es': 1.15,  # Spanish
+    'fi': 1.20,  # Finnish
+    'sr': 1.20,  # Serbian
+    'ja': 1.15,  # Japanese
+    'ro': 1.15,  # Romanian
 }
 
 # Country priority boosts (ISO 3166-1 alpha-2)
@@ -35,6 +39,10 @@ PRIORITY_COUNTRIES = {
     'KR': 1.20,  # South Korean
     'ES': 1.15,  # Spanish
     'AR': 1.20,  # Argentinian
+    'FI': 1.20,  # Finnish
+    'RS': 1.20,  # Serbian
+    'JP': 1.15,  # Japanese
+    'RO': 1.15,  # Romanian
 }
 
 # Feature vector dimensions

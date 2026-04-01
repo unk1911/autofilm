@@ -1,13 +1,15 @@
 import json
 import numpy as np
+from collections import Counter
 from pathlib import Path
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 from .config import DATA_DIR, PRIORITY_LANGUAGES, PRIORITY_COUNTRIES, MIN_VOTE_COUNT, MIN_TMDB_SCORE
 from .tmdb import TMDBClient
+from .prestige import prestige_score
 
 EMBEDDINGS_FILE = DATA_DIR / 'embeddings.npz'
-MODEL_NAME = 'all-MiniLM-L6-v2'
+MODEL_NAME = 'paraphrase-multilingual-MiniLM-L12-v2'
 
 
 def _movie_text(movie: dict) -> str:
@@ -81,12 +83,15 @@ def load_embeddings():
     return data['embeddings'], data['ids']
 
 
-def recommend(ratings: dict, top_n: int = 20):
+def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None' = None):
     """
     Recommend using semantic embeddings + anti-popularity bias.
 
     Taste profile = weighted mean of liked embeddings - weighted mean of disliked.
     Score = cosine similarity to taste profile * anti-popularity bias.
+
+    If nn_predictions is provided (array aligned to all_cached() order, 0-10 scale),
+    it is blended in as a ±20% nudge on top of the embedding-based score.
     """
     embeddings, ids = load_embeddings()
     id_to_idx = {int(mid): i for i, mid in enumerate(ids)}
@@ -145,6 +150,21 @@ def recommend(ratings: dict, top_n: int = 20):
     # Cosine similarity (embeddings are already L2-normalized)
     similarities = embeddings @ profile
 
+    # Build director affinity table from loved films (score >= 9)
+    director_counts: Counter = Counter()
+    movie_by_id = {m['id']: m for m in all_movies}
+    for tid_str, score in ratings.items():
+        if score >= 9:
+            m = movie_by_id.get(int(tid_str))
+            if m:
+                for c in m.get('credits', {}).get('crew', []):
+                    if c.get('job') == 'Director':
+                        director_counts[c['name']] += 1
+
+    def _director_boost(name: str) -> float:
+        count = director_counts.get(name, 0)
+        return 1.0 + 0.3 * min(count, 4)  # caps at 2.2x for 4+ loved films
+
     # Score all films
     results = []
     for i, movie in enumerate(all_movies):
@@ -200,14 +220,19 @@ def recommend(ratings: dict, top_n: int = 20):
         cb = max((PRIORITY_COUNTRIES.get(c, 1.0) for c in countries), default=1.0)
         locale_boost = max(lb, cb)
 
-        # Similarity is king — square it so taste match dominates
-        final = (sim ** 2) * quality * obscurity_boost * locale_boost
-
         # Extract metadata for display
         crew = movie.get('credits', {}).get('crew', [])
         director = next((c['name'] for c in crew if c.get('job') == 'Director'), '?')
         rd = movie.get('release_date', '') or ''
         year = rd[:4] if len(rd) >= 4 else ''
+
+        # NN blend: ±20% nudge from structured feature model (if available)
+        nn_blend = 1.0
+        if nn_predictions is not None:
+            nn_blend = 0.8 + 0.4 * (float(nn_predictions[i]) / 10.0)
+
+        # Similarity is king — square it so taste match dominates
+        final = (sim ** 2) * quality * obscurity_boost * locale_boost * _director_boost(director) * prestige_score(tid) * nn_blend
 
         results.append({
             'score': final,

@@ -107,6 +107,8 @@ def cmd_build(_args):
 
 def cmd_run(args):
     from src.embeddings import EMBEDDINGS_FILE, recommend as emb_recommend, print_recommendations
+    from src.nn_model import MODEL_FILE, load_model, predict as nn_predict
+    from src.nn_features import FEATURES_FILE as NN_FEATURES_FILE, load_training_data
 
     top_n = 20
     if '--top' in args:
@@ -119,7 +121,14 @@ def cmd_run(args):
     with open(RATINGS_FILE) as f:
         ratings = json.load(f)
 
-    recs = emb_recommend(ratings, top_n=top_n)
+    # Optionally blend NN predictions if model + features are available
+    nn_predictions = None
+    if MODEL_FILE.exists() and NN_FEATURES_FILE.exists():
+        _, _, X_all = load_training_data()
+        model = load_model(X_all.shape[1])
+        nn_predictions = nn_predict(model, X_all)
+
+    recs = emb_recommend(ratings, top_n=top_n, nn_predictions=nn_predictions)
     print_recommendations(recs)
 
 
