@@ -41,31 +41,38 @@ def _get(url: str, **kwargs) -> requests.Response:
 
 
 def scrape_sight_and_sound() -> list[tuple]:
-    """Sight & Sound 2022 Greatest Films poll — top 250."""
+    """Sight & Sound 2022 Greatest Films poll — top 10 critics + top 10 directors from Wikipedia."""
     print("Scraping Sight & Sound 2022 ...")
-    url = 'https://en.wikipedia.org/wiki/Sight_%26_Sound_Greatest_Films_of_All_Time'
+    url = 'https://en.wikipedia.org/wiki/The_Sight_and_Sound_Greatest_Films_of_All_Time_2022'
     soup = BeautifulSoup(_get(url).text, 'html.parser')
 
     results = []
-    for table in soup.find_all('table', class_='wikitable'):
-        for row in table.find_all('tr')[1:]:
-            cells = row.find_all(['td', 'th'])
-            if len(cells) < 2:
-                continue
-            rank_text = cells[0].get_text(strip=True).rstrip('=')
-            try:
-                rank = int(rank_text)
-            except ValueError:
-                continue
-            # Title is usually in the 2nd column; strip footnote refs
-            title = cells[1].get_text(strip=True)
-            title = re.sub(r'\[.*?\]', '', title).strip()
-            # Year in parentheses if present
+    seen = set()
+
+    # The page has numbered <ol> or <li> lists under headings for critics/directors polls.
+    # Each <li> contains a wikilink with the film title.
+    for ol in soup.find_all('ol'):
+        for rank, li in enumerate(ol.find_all('li'), start=1):
+            text = li.get_text(strip=True)
+            text = re.sub(r'\[.*?\]', '', text).strip()
+            # Extract year from parentheses
             year = None
-            m = re.search(r'\((\d{4})\)', title)
+            m = re.search(r'\((\d{4})\)', text)
             if m:
                 year = int(m.group(1))
-                title = title[:m.start()].strip()
+                text = text[:m.start()].strip()
+            # Strip vote counts like "215 votes, 13.1%"
+            text = re.sub(r'\d+ votes.*', '', text).strip().rstrip(',').strip()
+            # Try to get clean title from the first wikilink
+            link = li.find('a')
+            if link and link.get('title'):
+                title = link['title']
+                title = re.sub(r'\[.*?\]', '', title).strip()
+            else:
+                title = text
+            if not title or title in seen:
+                continue
+            seen.add(title)
             results.append((title, year, rank, 'sight_and_sound'))
 
     print(f"  {len(results)} films")
@@ -191,26 +198,16 @@ def match_to_tmdb(films: list[tuple], client: TMDBClient) -> dict[str, float]:
             print(f"  matching {i+1}/{total} ...")
 
         # Search TMDB
-        try:
-            results = client.search(title, year=year)
-        except Exception as e:
-            print(f"  TMDB error for '{title}': {e}")
-            time.sleep(1)
-            continue
+        result = client.search(title, year=year)
 
-        if not results:
+        if not result and year:
             # Retry without year constraint
-            if year:
-                try:
-                    results = client.search(title)
-                except Exception:
-                    continue
+            result = client.search(title)
 
-        if not results:
+        if not result:
             continue
 
-        # Take the best match (first result)
-        tmdb_id = str(results[0].get('id', ''))
+        tmdb_id = str(result.get('id', ''))
         if not tmdb_id:
             continue
 
@@ -252,10 +249,16 @@ def match_to_tmdb(films: list[tuple], client: TMDBClient) -> dict[str, float]:
 def main():
     all_films = []
 
-    all_films += scrape_sight_and_sound()
-    all_films += scrape_tspdt()
-    all_films += scrape_criterion()
-    all_films += scrape_ebert()
+    for name, fn in [
+        ('Sight & Sound', scrape_sight_and_sound),
+        ('TSPDT',         scrape_tspdt),
+        ('Criterion',     scrape_criterion),
+        ('Ebert',         scrape_ebert),
+    ]:
+        try:
+            all_films += fn()
+        except Exception as e:
+            print(f"  WARNING: {name} scraper failed ({e}) — skipping")
 
     print(f"\nTotal entries to match: {len(all_films)}")
     print("Matching to TMDB IDs (this will take a few minutes) ...")
