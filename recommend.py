@@ -10,6 +10,7 @@ Usage:
   python recommend.py run     [--top N]     Show top N recommendations (default 20)
   python recommend.py add     <title> <year> <rating 1-10>  Add a single film manually
   python recommend.py list                              List all rated films
+  python recommend.py del     <title> [year]            Delete a rating entry
 
 Examples:
   python recommend.py add "Dogville" "2003" 10
@@ -226,6 +227,52 @@ def cmd_list(args):
     print(f"\n  Total: {len(rows)} films")
 
 
+def cmd_del(args):
+    """Delete a rated film by title (and optional year)."""
+    if not args:
+        print("Usage: python recommend.py del <title> [year]")
+        return
+
+    title_query = args[0].lower()
+    year_query = args[1] if len(args) > 1 else None
+
+    with open(RATINGS_FILE) as f:
+        ratings = json.load(f)
+
+    from src.tmdb import TMDBClient
+    client = TMDBClient()
+
+    matches = []
+    for tid_str, score in ratings.items():
+        movie = client.get_movie(int(tid_str))
+        if not movie:
+            continue
+        title = movie.get('title', '')
+        rd = (movie.get('release_date', '') or '')[:4]
+        if title_query in title.lower():
+            if year_query is None or rd == str(year_query):
+                matches.append((tid_str, title, rd, score))
+
+    if not matches:
+        print(f"No match found for '{args[0]}'")
+        return
+
+    if len(matches) > 1:
+        print("Multiple matches — be more specific (add year):")
+        for tid_str, title, year, score in matches:
+            print(f"  {title} ({year})  {score}/10  [id {tid_str}]")
+        return
+
+    tid_str, title, year, score = matches[0]
+    del ratings[tid_str]
+
+    with open(RATINGS_FILE, 'w') as f:
+        json.dump(ratings, f, indent=2)
+
+    print(f"Deleted: {title} ({year}) — {score}/10")
+    print(f"Total ratings: {len(ratings)}")
+
+
 COMMANDS = {
     'setup':  cmd_setup,
     'ingest': cmd_ingest,
@@ -234,6 +281,7 @@ COMMANDS = {
     'run':    cmd_run,
     'add':    cmd_add,
     'list':   cmd_list,
+    'del':    cmd_del,
 }
 
 
