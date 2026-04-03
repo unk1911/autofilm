@@ -360,6 +360,170 @@ def _build_explanation(r: dict) -> str:
         return f"{lead} -- {body}."
 
 
+def find_similar(title: str, year: str, ratings: dict, top_n: int = 20) -> list:
+    """
+    Find catalog films similar to a given film, personalized by user taste.
+
+    Scoring: 70% similarity to the query film + 30% alignment with user taste profile.
+    Films the user has already rated are excluded.
+    """
+    embeddings, ids = load_embeddings()
+    if embeddings.ndim < 2 or embeddings.shape[0] == 0:
+        raise RuntimeError(
+            "Embeddings file is empty — run 'python recommend.py train' first"
+        )
+    id_to_idx = {int(mid): i for i, mid in enumerate(ids)}
+
+    client = TMDBClient()
+
+    # Resolve query film
+    print(f"  Searching TMDB for '{title}' ({year}) ...")
+    result = client.search(title, year=str(year))
+    if not result:
+        raise SystemExit(f"Could not find '{title}' ({year}) on TMDB.")
+    query_id = result['id']
+    query_movie = client.get_movie(query_id)
+    if not query_movie:
+        raise SystemExit(f"Could not fetch full metadata for '{title}' from TMDB.")
+
+    found_title = query_movie.get('title', title)
+    rd = query_movie.get('release_date', '') or ''
+    found_year = rd[:4] if len(rd) >= 4 else str(year)
+    print(f"  Query film: {found_title} ({found_year})")
+
+    # Get or build query embedding
+    if query_id in id_to_idx:
+        query_vec = embeddings[id_to_idx[query_id]].astype(np.float64)
+    else:
+        print("  Film not in embeddings — embedding on-the-fly ...")
+        model = SentenceTransformer(MODEL_NAME)
+        text = _movie_text(query_movie)
+        query_vec = model.encode([text], normalize_embeddings=True)[0].astype(np.float64)
+
+    query_vec = query_vec.astype(np.float32)
+    sim_to_query = embeddings @ query_vec  # cosine similarities to query
+
+    # Build user taste profile (same logic as recommend)
+    pos_vec = np.zeros(embeddings.shape[1], dtype=np.float64)
+    neg_vec = np.zeros(embeddings.shape[1], dtype=np.float64)
+    pos_w = neg_w = 0.0
+    for tid_str, score in ratings.items():
+        idx = id_to_idx.get(int(tid_str))
+        if idx is None:
+            continue
+        if score >= 9:
+            w = 2.0 if score == 10 else 1.0
+            pos_vec += w * embeddings[idx].astype(np.float64)
+            pos_w += w
+        elif score <= 5:
+            w = float(6 - score)
+            neg_vec += w * embeddings[idx].astype(np.float64)
+            neg_w += w
+    pos_vec /= max(pos_w, 1e-8)
+    if neg_w > 0:
+        neg_vec /= neg_w
+    profile = pos_vec - 0.8 * neg_vec
+    norm = np.linalg.norm(profile)
+    if norm > 0:
+        profile /= norm
+    taste_sim = embeddings @ profile.astype(np.float32)
+
+    rated_ids = {int(k) for k in ratings}
+    all_movies = list(client.all_cached())
+    movie_by_id = {m['id']: m for m in all_movies}
+
+    # Director affinity
+    director_counts: Counter = Counter()
+    for tid_str, score in ratings.items():
+        if score >= 9:
+            m = movie_by_id.get(int(tid_str))
+            if m:
+                for c in m.get('credits', {}).get('crew', []):
+                    if c.get('job') == 'Director':
+                        director_counts[c['name']] += 1
+
+    def _director_boost(name: str) -> float:
+        return 1.0 + 0.3 * min(director_counts.get(name, 0), 4)
+
+    results = []
+    for i, movie in enumerate(all_movies):
+        tid = movie['id']
+        if tid in rated_ids or tid == query_id:
+            continue
+
+        va = movie.get('vote_average', 0) or 0
+        vc = movie.get('vote_count', 0) or 0
+        if vc < MIN_VOTE_COUNT or va < MIN_TMDB_SCORE:
+            continue
+
+        runtime = movie.get('runtime', 0) or 0
+        genres = [g['name'] for g in movie.get('genres', [])]
+        is_anime = 'Animation' in genres and movie.get('original_language') == 'ja'
+        if 0 < runtime < 60 and not is_anime:
+            continue
+        if 'Family' in genres and not is_anime:
+            continue
+        if 'TV Movie' in genres:
+            continue
+
+        sq = float(sim_to_query[i])
+        if sq < 0.2:
+            continue
+
+        ts = float(taste_sim[i])
+        combined_sim = 0.7 * sq + 0.3 * max(ts, 0.0)
+
+        quality = (va / 10.0) ** 1.5
+        lang = movie.get('original_language', '')
+        lb = PRIORITY_LANGUAGES.get(lang, 1.0)
+        countries = [c.get('iso_3166_1', '') for c in movie.get('production_countries', [])]
+        cb = max((PRIORITY_COUNTRIES.get(c, 1.0) for c in countries), default=1.0)
+        locale_boost = max(lb, cb)
+        crew = movie.get('credits', {}).get('crew', [])
+        director = next((c['name'] for c in crew if c.get('job') == 'Director'), '?')
+        dir_boost = _director_boost(director)
+        prest = prestige_score(tid)
+        rd2 = movie.get('release_date', '') or ''
+        year_out = rd2[:4] if len(rd2) >= 4 else ''
+
+        final = (combined_sim ** 2) * quality * locale_boost * dir_boost * prest
+
+        results.append({
+            'score': final,
+            'similarity': sq,
+            'title': movie.get('title', '?'),
+            'year': year_out,
+            'overview': (movie.get('overview') or '').strip(),
+            'genres': genres,
+            'director': director,
+            'language': lang,
+            'tmdb_score': va,
+            'vote_count': vc,
+            '_quality': quality,
+            '_obscurity_boost': 1.0,
+            '_locale_boost': locale_boost,
+            '_director_boost': dir_boost,
+            '_prestige': prest,
+            '_nn_blend': 1.0,
+        })
+
+    results.sort(key=lambda r: r['score'], reverse=True)
+
+    # Genre diversity cap
+    max_per_genre = max(top_n * 2 // 5, 4)
+    genre_counts: dict = {}
+    diverse = []
+    for r in results:
+        primary = r['genres'][0] if r['genres'] else 'Unknown'
+        genre_counts[primary] = genre_counts.get(primary, 0) + 1
+        if genre_counts[primary] <= max_per_genre:
+            diverse.append(r)
+        if len(diverse) >= top_n:
+            break
+
+    return diverse
+
+
 def print_recommendations(recs: list):
     n = len(recs)
     print(f"\n{'=' * 70}")

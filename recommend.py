@@ -8,6 +8,7 @@ Usage:
   python recommend.py build                 Rebuild feature matrix from cache
   python recommend.py train                 Rebuild embeddings (re-run after new ratings)
   python recommend.py run     [--top N] [--temp T]  Show top N recommendations (default 20)
+  python recommend.py similar <title> <year> [--top N]  Find films similar to a given film
   python recommend.py add     <title> <year> <rating 1-10>  Add a single film manually
   python recommend.py list                              List all rated films
   python recommend.py del     <title> [year]            Delete a rating entry
@@ -155,6 +156,38 @@ def cmd_run(args):
     print_recommendations(recs)
 
 
+def cmd_similar(args):
+    """Find films similar to a given title, personalized by your taste."""
+    if len(args) < 2:
+        print("Usage: python recommend.py similar <title> <year> [--top N]")
+        print("Example: python recommend.py similar 'I Am Still Here' 2024")
+        return
+
+    title = args[0]
+    year = args[1]
+
+    top_n = 20
+    if '--top' in args:
+        top_n = int(args[args.index('--top') + 1])
+
+    from src.embeddings import find_similar, print_recommendations
+
+    if not RATINGS_FILE.exists():
+        print("No ratings found. Run: python recommend.py ingest")
+        return
+
+    with open(RATINGS_FILE) as f:
+        ratings = json.load(f)
+
+    recs = find_similar(title, year, ratings, top_n=top_n)
+    if not recs:
+        print("No similar films found.")
+        return
+
+    print(f"\n  Similar to: {title} ({year})")
+    print_recommendations(recs)
+
+
 def cmd_train(args):
     """Train neural network on your ratings."""
     from src.embeddings import build_embeddings
@@ -288,14 +321,15 @@ def cmd_del(args):
 
 
 COMMANDS = {
-    'setup':  cmd_setup,
-    'ingest': cmd_ingest,
-    'build':  cmd_build,
-    'train':  cmd_train,
-    'run':    cmd_run,
-    'add':    cmd_add,
-    'list':   cmd_list,
-    'del':    cmd_del,
+    'setup':   cmd_setup,
+    'ingest':  cmd_ingest,
+    'build':   cmd_build,
+    'train':   cmd_train,
+    'run':     cmd_run,
+    'similar': cmd_similar,
+    'add':     cmd_add,
+    'list':    cmd_list,
+    'del':     cmd_del,
 }
 
 
