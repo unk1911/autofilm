@@ -75,13 +75,15 @@ The final taste profile is `positive - 0.8 * negative`, normalized to unit lengt
 Every unrated film is scored by:
 
 ```
-score = similarity^2 * quality * obscurity_boost * locale_boost
+score = similarity^2 * quality * obscurity_boost * locale_boost * director_boost * prestige
 ```
 
 - **similarity**: cosine similarity between the film's embedding and your taste profile. Squared so that taste match dominates.
 - **quality**: `(tmdb_score / 10)^1.5` -- rewards critically acclaimed films, penalizes mediocre ones.
 - **obscurity_boost**: inverse log of vote count. Films with fewer votes get boosted; blockbusters with 5k+ votes are penalized. This surfaces hidden gems over obvious picks.
 - **locale_boost**: small multiplier for preferred languages/countries (French, Korean, Russian, Croatian, Spanish, etc.).
+- **director_boost**: up to 2.2x boost for directors with multiple loved films (score >= 9).
+- **prestige**: multiplier (1.0-1.3x) for films recognized across major awards and curated lists (Sight & Sound, TSPDT, Criterion, Ebert).
 
 ### Filters
 
@@ -94,6 +96,35 @@ Before scoring, films are filtered out if they:
 
 After scoring, a **genre diversity cap** ensures no single genre takes more than 40% of the results.
 
+### Temperature (result randomness)
+
+By default, recommendations are deterministic -- the same ratings always produce the same list. The `--temp` flag introduces controlled randomness so you can explore different suggestions across runs:
+
+```bash
+python recommend.py run --temp 0.3
+```
+
+The system applies multiplicative log-normal noise to scores before ranking: `score *= exp(temperature * N(0,1))`. This preserves the ratio structure of scores -- high-quality matches still dominate, but nearby items shuffle position.
+
+| Temperature | Effect |
+|-------------|--------|
+| 0.0 | Deterministic (default) |
+| 0.1 | Very mild shuffling, adjacent items may swap |
+| 0.3 | Moderate exploration, good default for variety |
+| 0.5 | Substantial reordering |
+| 1.0+ | Extreme, not recommended |
+
+### Match explanations
+
+Each recommendation includes a short paragraph explaining why it was suggested. The explanation highlights the strongest scoring factors for that film:
+
+- Taste profile alignment (similarity strength)
+- Director affinity (you've loved other films by this director)
+- Obscurity (hidden gem with few ratings)
+- Critical quality (high TMDB score)
+- Prestige (recognized across film awards and curated lists)
+- Locale preference (matches your preferred language/country)
+
 ## Architecture
 
 ```
@@ -104,6 +135,7 @@ src/
   tmdb.py                 TMDB API client with SQLite cache
   letterboxd.py           Letterboxd RSS scraper + CSV import
   embeddings.py           Sentence transformer embeddings + recommendation engine
+  prestige.py             Prestige score lookup from curated film lists
   features.py             (legacy) Sparse IDF-weighted feature vectors
   nn_model.py             (legacy) PyTorch neural network
   nn_features.py          (legacy) One-hot feature engineering for NN
@@ -111,6 +143,7 @@ data/
   tmdb_cache.db           SQLite cache of TMDB metadata
   ratings.json            Your ratings (TMDB ID -> score 1-10)
   embeddings.npz          Precomputed 384-dim embeddings for all films
+  prestige_index.json     Film prestige multipliers from awards/curated lists
 ```
 
 ## Why not collaborative filtering?

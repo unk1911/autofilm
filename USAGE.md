@@ -1,4 +1,4 @@
-# sim-film usage
+# autofilm usage
 
 ## Prerequisites
 
@@ -53,9 +53,23 @@ Run this after adding new films via `setup` or `add`.
 ### run — show recommendations
 
 ```bash
-python recommend.py run
+python recommend.py run                  # default: top 20, deterministic
 python recommend.py run --top 50         # show top 50 instead of default 20
+python recommend.py run --temp 0.3       # add randomness so repeated runs differ
+python recommend.py run --top 30 --temp 0.3  # combine both flags
 ```
+
+**Temperature (`--temp`)** controls how much the ranking shuffles between runs:
+
+| Value | Effect |
+|-------|--------|
+| 0.0 | Deterministic — identical results every run (default) |
+| 0.1 | Very mild shuffling, adjacent items may swap |
+| 0.3 | Moderate exploration, good default for variety |
+| 0.5 | Substantial reordering |
+| 1.0+ | Extreme, not recommended |
+
+Each recommendation also includes a short explanation of why it was suggested, highlighting the strongest scoring factors (taste similarity, director affinity, obscurity, quality, prestige, locale).
 
 ### build — rebuild feature matrix (legacy)
 
