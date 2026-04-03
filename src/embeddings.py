@@ -254,6 +254,7 @@ def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None
             'similarity': sim,
             'title': movie.get('title', '?'),
             'year': year,
+            'overview': (movie.get('overview') or '').strip(),
             'genres': genres,
             'director': director,
             'language': lang,
@@ -372,6 +373,11 @@ def print_recommendations(recs: list):
         print(f"  {rank:2d}. {r['title']}{yr}")
         print(f"      {genre_str}  |  {r['language']}  |  TMDB {r['tmdb_score']:.1f}")
         print(f"      dir: {r['director']}  |  match: {r['similarity']:.2f}")
+
+        overview = r.get('overview', '')
+        if overview:
+            blurb = overview if len(overview) <= 120 else overview[:117].rsplit(' ', 1)[0] + '...'
+            print(f"      {blurb}")
 
         explanation = _build_explanation(r)
         if explanation:
