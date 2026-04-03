@@ -96,7 +96,7 @@ def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None
     embeddings, ids = load_embeddings()
     if embeddings.ndim < 2 or embeddings.shape[0] == 0:
         raise RuntimeError(
-            "Embeddings file is empty — run 'python recommend.py build-embeddings' first"
+            "Embeddings file is empty — run 'python recommend.py train' first"
         )
     id_to_idx = {int(mid): i for i, mid in enumerate(ids)}
 

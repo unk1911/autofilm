@@ -9,14 +9,33 @@ from .config import TMDB_CACHE_DB
 BASE_URL = 'https://api.themoviedb.org/3'
 
 
+def _load_dotenv():
+    """Load .env from the project root (one level up from this file) if present."""
+    env_path = Path(__file__).parent.parent / '.env'
+    if not env_path.exists():
+        return
+    with open(env_path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, _, value = line.partition('=')
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
 def get_api_key():
+    _load_dotenv()
     key = os.environ.get('TMDB_API_KEY', '').strip()
     if not key:
         raise SystemExit(
             "\nTMDB_API_KEY not set.\n"
             "  1. Go to https://www.themoviedb.org/settings/api (free account)\n"
             "  2. Copy your API key (v3 auth)\n"
-            "  3. Run:  export TMDB_API_KEY=your_key_here\n"
+            "  3. Either add to .env:  TMDB_API_KEY=your_key_here\n"
+            "     or export:           export TMDB_API_KEY=your_key_here\n"
         )
     return key
 
