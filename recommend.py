@@ -21,6 +21,7 @@ Options:
             0.3  moderate exploration, good default for variety
             0.5  substantial reordering
             1.0+ extreme, not recommended
+  --user U  Profile id to use (default: default)
 
 Examples:
   python recommend.py add "Dogville" "2003" 10
@@ -42,10 +43,11 @@ from pathlib import Path
 # make sure imports work from project root
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.config import RATINGS_FILE
+from src.config import LETTERBOXD_USERNAME
+from src.user_paths import get_user_paths
 
 
-def cmd_setup(args):
+def cmd_setup(args, _paths):
     from src.catalog import download_movielens, fetch_all_metadata
     from src.features import build_features
 
@@ -58,7 +60,7 @@ def cmd_setup(args):
     build_features()
 
 
-def cmd_ingest(args):
+def cmd_ingest(args, paths):
     import time
     from src.letterboxd import scrape_ratings, read_csv_export
     from src.tmdb import TMDBClient
@@ -66,7 +68,8 @@ def cmd_ingest(args):
     if '--csv' in args:
         rated = read_csv_export()
     else:
-        rated = scrape_ratings()
+        username = LETTERBOXD_USERNAME if paths.user == 'default' else paths.user
+        rated = scrape_ratings(username=username)
 
     if not rated:
         print("No ratings found.")
@@ -78,8 +81,8 @@ def cmd_ingest(args):
 
     # Load existing ratings so we merge rather than replace
     existing = {}
-    if RATINGS_FILE.exists():
-        with open(RATINGS_FILE) as f:
+    if paths.ratings_file.exists():
+        with open(paths.ratings_file) as f:
             existing = json.load(f)
 
     ratings = dict(existing)
@@ -106,8 +109,8 @@ def cmd_ingest(args):
         ratings[tid_str] = film['rating']
         time.sleep(0.05)
 
-    RATINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(RATINGS_FILE, 'w') as f:
+    paths.ratings_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(paths.ratings_file, 'w') as f:
         json.dump(ratings, f, indent=2)
 
     print(f"\nTotal: {len(ratings)} films ({new_count} new)")
@@ -117,18 +120,18 @@ def cmd_ingest(args):
             print(f"  - {t}")
         if len(failed) > 10:
             print(f"  ... and {len(failed) - 10} more")
-    print(f"Saved → {RATINGS_FILE}")
+    print(f"Saved ({paths.user}) → {paths.ratings_file}")
 
 
-def cmd_build(_args):
+def cmd_build(_args, _paths):
     from src.features import build_features
     build_features()
 
 
-def cmd_run(args):
+def cmd_run(args, paths):
     from src.embeddings import EMBEDDINGS_FILE, recommend as emb_recommend, print_recommendations
-    from src.nn_model import MODEL_FILE, load_model, predict as nn_predict
-    from src.nn_features import FEATURES_FILE as NN_FEATURES_FILE, load_training_data
+    from src.nn_model import load_model, predict as nn_predict
+    from src.nn_features import load_training_data
 
     top_n = 20
     if '--top' in args:
@@ -142,21 +145,25 @@ def cmd_run(args):
         print("No embeddings. Run:  python recommend.py train")
         return
 
-    with open(RATINGS_FILE) as f:
+    if not paths.ratings_file.exists():
+        print(f"No ratings found for '{paths.user}'. Run: python recommend.py ingest --user {paths.user}")
+        return
+
+    with open(paths.ratings_file) as f:
         ratings = json.load(f)
 
     # Optionally blend NN predictions if model + features are available
     nn_predictions = None
-    if MODEL_FILE.exists() and NN_FEATURES_FILE.exists():
-        _, _, X_all = load_training_data()
-        model = load_model(X_all.shape[1])
+    if paths.nn_model_file.exists() and paths.nn_features_file.exists():
+        _, _, X_all = load_training_data(features_file=paths.nn_features_file)
+        model = load_model(X_all.shape[1], model_file=paths.nn_model_file)
         nn_predictions = nn_predict(model, X_all)
 
     recs = emb_recommend(ratings, top_n=top_n, nn_predictions=nn_predictions, temperature=temperature)
     print_recommendations(recs)
 
 
-def cmd_similar(args):
+def cmd_similar(args, paths):
     """Find films similar to a given title, personalized by your taste."""
     if len(args) < 2:
         print("Usage: python recommend.py similar <title> <year> [--top N]")
@@ -172,11 +179,11 @@ def cmd_similar(args):
 
     from src.embeddings import find_similar, print_recommendations
 
-    if not RATINGS_FILE.exists():
+    if not paths.ratings_file.exists():
         print("No ratings found. Run: python recommend.py ingest")
         return
 
-    with open(RATINGS_FILE) as f:
+    with open(paths.ratings_file) as f:
         ratings = json.load(f)
 
     recs = find_similar(title, year, ratings, top_n=top_n)
@@ -188,14 +195,39 @@ def cmd_similar(args):
     print_recommendations(recs)
 
 
-def cmd_train(args):
-    """Train neural network on your ratings."""
+def cmd_train(args, paths):
+    """Train embeddings and user-specific NN artifacts."""
     from src.embeddings import build_embeddings
+    from src.nn_features import build_training_data
+    from src.nn_model import train_model
+
     build_embeddings()
-    print("Done. Run: python recommend.py run")
+
+    if not paths.ratings_file.exists():
+        print(f"No ratings found for '{paths.user}'. Skipping NN training.")
+        print(f"Add ratings first: python recommend.py ingest --user {paths.user}")
+        print(f"Done. Run: python recommend.py run --user {paths.user}")
+        return
+
+    with open(paths.ratings_file) as f:
+        ratings = json.load(f)
+
+    if not ratings:
+        print(f"No ratings found for '{paths.user}'. Skipping NN training.")
+        print(f"Done. Run: python recommend.py run --user {paths.user}")
+        return
+
+    paths.user_dir.mkdir(parents=True, exist_ok=True)
+    X_train, y_train, *_ = build_training_data(
+        ratings,
+        features_file=paths.nn_features_file,
+        vocab_file=paths.nn_vocab_file,
+    )
+    train_model(X_train, y_train, model_file=paths.nn_model_file)
+    print(f"Done. Run: python recommend.py run --user {paths.user}")
 
 
-def cmd_add(args):
+def cmd_add(args, paths):
     """Add a single film by title, year, and rating."""
     if len(args) < 3:
         print("Usage: python recommend.py add <title> <year> <rating 1-10>")
@@ -225,15 +257,15 @@ def cmd_add(args):
 
     # Load existing
     try:
-        with open(RATINGS_FILE) as f:
+        with open(paths.ratings_file) as f:
             ratings = json.load(f)
     except:
         ratings = {}
 
     ratings[tid] = score
 
-    RATINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(RATINGS_FILE, 'w') as f:
+    paths.ratings_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(paths.ratings_file, 'w') as f:
         json.dump(ratings, f, indent=2)
 
     title_found = result.get('title', title)
@@ -241,13 +273,13 @@ def cmd_add(args):
     print(f"Total ratings: {len(ratings)}")
 
 
-def cmd_list(args):
+def cmd_list(args, paths):
     """List all rated films, sorted by rating descending."""
-    if not RATINGS_FILE.exists():
+    if not paths.ratings_file.exists():
         print("No ratings yet. Run: python recommend.py ingest")
         return
 
-    with open(RATINGS_FILE) as f:
+    with open(paths.ratings_file) as f:
         ratings = json.load(f)
 
     from src.tmdb import TMDBClient
@@ -274,7 +306,7 @@ def cmd_list(args):
     print(f"\n  Total: {len(rows)} films")
 
 
-def cmd_del(args):
+def cmd_del(args, paths):
     """Delete a rated film by title (and optional year)."""
     if not args:
         print("Usage: python recommend.py del <title> [year]")
@@ -283,7 +315,11 @@ def cmd_del(args):
     title_query = args[0].lower()
     year_query = args[1] if len(args) > 1 else None
 
-    with open(RATINGS_FILE) as f:
+    if not paths.ratings_file.exists():
+        print("No ratings yet. Run: python recommend.py ingest")
+        return
+
+    with open(paths.ratings_file) as f:
         ratings = json.load(f)
 
     from src.tmdb import TMDBClient
@@ -313,7 +349,7 @@ def cmd_del(args):
     tid_str, title, year, score = matches[0]
     del ratings[tid_str]
 
-    with open(RATINGS_FILE, 'w') as f:
+    with open(paths.ratings_file, 'w') as f:
         json.dump(ratings, f, indent=2)
 
     print(f"Deleted: {title} ({year}) — {score}/10")
@@ -335,10 +371,25 @@ COMMANDS = {
 
 def main():
     args = sys.argv[1:]
+
+    user = 'default'
+    if '--user' in args:
+        i = args.index('--user')
+        if i + 1 >= len(args):
+            raise SystemExit("Missing value for --user")
+        user = args[i + 1]
+        args = args[:i] + args[i + 2:]
+
+    try:
+        paths = get_user_paths(user)
+    except ValueError as e:
+        raise SystemExit(str(e))
+
     if not args or args[0] not in COMMANDS:
         print(__doc__)
         sys.exit(1)
-    COMMANDS[args[0]](args[1:])
+    print(f"Using profile: {paths.user}")
+    COMMANDS[args[0]](args[1:], paths)
 
 
 if __name__ == '__main__':

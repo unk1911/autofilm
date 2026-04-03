@@ -28,7 +28,13 @@ class RecommendationNetwork(nn.Module):
         return self.net(x)
 
 
-def train_model(X_train: np.ndarray, y_train: np.ndarray, epochs: int = 100, lr: float = 0.001):
+def train_model(
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    epochs: int = 100,
+    lr: float = 0.001,
+    model_file: Path = DATA_DIR / 'recommendation_model.pt',
+):
     """Train the neural network on user ratings."""
     print(f"Training on {len(X_train)} films...")
 
@@ -65,15 +71,18 @@ def train_model(X_train: np.ndarray, y_train: np.ndarray, epochs: int = 100, lr:
                 print(f"  early stopping at epoch {epoch+1}")
                 break
 
-    torch.save(model.state_dict(), MODEL_FILE)
-    print(f"Model saved → {MODEL_FILE}")
+    torch.save(model.state_dict(), model_file)
+    print(f"Model saved → {model_file}")
     return model
 
 
-def load_model(input_dim: int) -> RecommendationNetwork:
+def load_model(
+    input_dim: int,
+    model_file: Path = DATA_DIR / 'recommendation_model.pt',
+) -> RecommendationNetwork:
     """Load pre-trained model."""
     model = RecommendationNetwork(input_dim)
-    model.load_state_dict(torch.load(MODEL_FILE, map_location='cpu'))
+    model.load_state_dict(torch.load(model_file, map_location='cpu'))
     return model.eval()
 
 

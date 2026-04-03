@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from collections import Counter
+from pathlib import Path
 from .config import DATA_DIR
 from .tmdb import TMDBClient
 
@@ -111,7 +112,11 @@ def featurize_movie(movie: dict, vocab: dict) -> np.ndarray:
     return np.array(features, dtype=np.float32)
 
 
-def build_training_data(ratings: dict):
+def build_training_data(
+    ratings: dict,
+    features_file: Path = DATA_DIR / 'nn_features.npz',
+    vocab_file: Path = DATA_DIR / 'nn_vocab.npz',
+):
     """Build feature matrix and target vector for training."""
     client = TMDBClient()
 
@@ -162,9 +167,9 @@ def build_training_data(ratings: dict):
     X_all = np.array(features_list, dtype=np.float32)
 
     # Save
-    np.savez_compressed(FEATURES_FILE, X_train=X_train, y_train=y_train, X_all=X_all)
+    np.savez_compressed(features_file, X_train=X_train, y_train=y_train, X_all=X_all)
     np.savez_compressed(
-        VOCAB_FILE,
+        vocab_file,
         genres=np.array(vocab['genres'], dtype=object),
         keywords=np.array(vocab['keywords'], dtype=object),
         directors=np.array(vocab['directors'], dtype=object),
@@ -176,9 +181,9 @@ def build_training_data(ratings: dict):
     return X_train, y_train, X_all, vocab, id_to_idx
 
 
-def load_training_data():
+def load_training_data(features_file: Path = DATA_DIR / 'nn_features.npz'):
     """Load pre-built training data."""
-    data = np.load(FEATURES_FILE)
+    data = np.load(features_file)
     return data['X_train'], data['y_train'], data['X_all']
 
 

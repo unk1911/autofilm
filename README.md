@@ -141,10 +141,14 @@ src/
   nn_features.py          (legacy) One-hot feature engineering for NN
 data/
   tmdb_cache.db           SQLite cache of TMDB metadata
-  ratings.json            Your ratings (TMDB ID -> score 1-10)
+  users/<id>/ratings.json Per-user ratings (TMDB ID -> score 1-10)
+  users/<id>/nn_*.npz     Per-user NN features/vocab artifacts
+  users/<id>/recommendation_model.pt  Per-user NN model
   embeddings.npz          Precomputed 384-dim embeddings for all films
   prestige_index.json     Film prestige multipliers from awards/curated lists
 ```
+
+Use `--user <id>` on CLI commands to switch profiles (default: `default`).
 
 ## Why not collaborative filtering?
 

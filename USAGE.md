@@ -24,6 +24,7 @@ Downloads the MovieLens dataset (~330 MB), fetches TMDB metadata for all films, 
 ```bash
 python recommend.py ingest               # scrape from RSS feed (recent diary entries)
 python recommend.py ingest --csv         # import from Letterboxd CSV export
+python recommend.py ingest --user alice  # use a named profile (Letterboxd @alice)
 ```
 
 For CSV: go to Letterboxd > Settings > Import & Export > Export Your Data, then place `ratings.csv` in the project root.
@@ -57,6 +58,22 @@ python recommend.py run                  # default: top 20, deterministic
 python recommend.py run --top 50         # show top 50 instead of default 20
 python recommend.py run --temp 0.3       # add randomness so repeated runs differ
 python recommend.py run --top 30 --temp 0.3  # combine both flags
+python recommend.py run --user alice     # run for a specific profile
+```
+
+### multi-user profiles
+
+Use `--user <id>` to scope ratings and NN artifacts to a profile. Ratings and model files are stored under `data/users/<id>/`.
+
+Examples:
+
+```bash
+python recommend.py ingest --user alice
+python recommend.py train --user alice
+python recommend.py run --user alice
+
+python recommend.py ingest --user bob
+python recommend.py run --user bob
 ```
 
 **Temperature (`--temp`)** controls how much the ranking shuffles between runs:

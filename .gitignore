@@ -17,6 +17,7 @@ data/features.npz
 data/nn_features.npz
 data/nn_vocab.npz
 data/recommendation_model.pt
+data/users/
 data/tmdb_cache.db
 
 # Playwright MCP logs
