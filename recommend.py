@@ -7,14 +7,24 @@ Usage:
   python recommend.py ingest  [--csv]       Import your Letterboxd ratings
   python recommend.py build                 Rebuild feature matrix from cache
   python recommend.py train                 Rebuild embeddings (re-run after new ratings)
-  python recommend.py run     [--top N]     Show top N recommendations (default 20)
+  python recommend.py run     [--top N] [--temp T]  Show top N recommendations (default 20)
   python recommend.py add     <title> <year> <rating 1-10>  Add a single film manually
   python recommend.py list                              List all rated films
   python recommend.py del     <title> [year]            Delete a rating entry
 
+Options:
+  --top N   Number of recommendations to show (default: 20)
+  --temp T  Temperature for result randomness (default: 0.0 = deterministic)
+            0.0  identical results every run
+            0.1  very mild shuffling, adjacent items may swap
+            0.3  moderate exploration, good default for variety
+            0.5  substantial reordering
+            1.0+ extreme, not recommended
+
 Examples:
   python recommend.py add "Dogville" "2003" 10
   python recommend.py run --top 40
+  python recommend.py run --temp 0.3
 
 First-time setup:
   1. Get a free TMDB API key: https://www.themoviedb.org/settings/api
@@ -123,6 +133,10 @@ def cmd_run(args):
     if '--top' in args:
         top_n = int(args[args.index('--top') + 1])
 
+    temperature = 0.0
+    if '--temp' in args:
+        temperature = float(args[args.index('--temp') + 1])
+
     if not EMBEDDINGS_FILE.exists():
         print("No embeddings. Run:  python recommend.py train")
         return
@@ -137,7 +151,7 @@ def cmd_run(args):
         model = load_model(X_all.shape[1])
         nn_predictions = nn_predict(model, X_all)
 
-    recs = emb_recommend(ratings, top_n=top_n, nn_predictions=nn_predictions)
+    recs = emb_recommend(ratings, top_n=top_n, nn_predictions=nn_predictions, temperature=temperature)
     print_recommendations(recs)
 
 

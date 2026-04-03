@@ -1,4 +1,5 @@
 import json
+import textwrap
 import numpy as np
 from collections import Counter
 from pathlib import Path
@@ -10,6 +11,14 @@ from .prestige import prestige_score
 
 EMBEDDINGS_FILE = DATA_DIR / 'embeddings.npz'
 MODEL_NAME = 'paraphrase-multilingual-MiniLM-L12-v2'
+
+_LANG_NAMES = {
+    'en': 'English-language', 'fr': 'French', 'ko': 'Korean',
+    'ja': 'Japanese', 'ru': 'Russian', 'es': 'Spanish',
+    'hr': 'Croatian', 'fi': 'Finnish', 'sr': 'Serbian',
+    'ro': 'Romanian', 'de': 'German', 'it': 'Italian',
+    'pt': 'Portuguese', 'zh': 'Chinese', 'hi': 'Hindi',
+}
 
 
 def _movie_text(movie: dict) -> str:
@@ -83,7 +92,7 @@ def load_embeddings():
     return data['embeddings'], data['ids']
 
 
-def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None' = None):
+def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None' = None, temperature: float = 0.0):
     """
     Recommend using semantic embeddings + anti-popularity bias.
 
@@ -236,7 +245,9 @@ def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None
             nn_blend = 0.8 + 0.4 * (float(nn_predictions[i]) / 10.0)
 
         # Similarity is king — square it so taste match dominates
-        final = (sim ** 2) * quality * obscurity_boost * locale_boost * _director_boost(director) * prestige_score(tid) * nn_blend
+        dir_boost = _director_boost(director)
+        prest = prestige_score(tid)
+        final = (sim ** 2) * quality * obscurity_boost * locale_boost * dir_boost * prest * nn_blend
 
         results.append({
             'score': final,
@@ -248,7 +259,25 @@ def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None
             'language': lang,
             'tmdb_score': va,
             'vote_count': vc,
+            '_quality': quality,
+            '_obscurity_boost': obscurity_boost,
+            '_locale_boost': locale_boost,
+            '_director_boost': dir_boost,
+            '_prestige': prest,
+            '_nn_blend': nn_blend,
         })
+
+    # Apply temperature-based noise for result diversity across runs
+    if temperature < 0:
+        print("  Warning: temperature < 0 clamped to 0")
+        temperature = 0.0
+    if temperature > 1.0:
+        print("  Warning: temperature > 1.0 may produce very unstable rankings")
+    if temperature > 0:
+        rng = np.random.default_rng()
+        noise = rng.standard_normal(len(results))
+        for idx, r in enumerate(results):
+            r['score'] *= float(np.exp(temperature * noise[idx]))
 
     results.sort(key=lambda r: r['score'], reverse=True)
 
@@ -268,6 +297,68 @@ def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None
     return diverse
 
 
+def _build_explanation(r: dict) -> str:
+    """Build a 2-3 sentence explanation of why this film was recommended."""
+    parts = []
+
+    # Taste similarity — always mentioned, primary signal
+    sim = r['similarity']
+    if sim >= 0.65:
+        parts.append(f"Strong alignment with your taste profile (match {sim:.0%})")
+    elif sim >= 0.50:
+        parts.append(f"Good alignment with your taste profile (match {sim:.0%})")
+    else:
+        parts.append(f"Moderate thematic overlap with your preferences (match {sim:.0%})")
+
+    # Director affinity
+    db = r.get('_director_boost', 1.0)
+    if db >= 1.6:
+        parts.append(f"you've loved several films by {r['director']}")
+    elif db >= 1.3:
+        parts.append(f"you've enjoyed other work by {r['director']}")
+
+    # Obscurity / hidden gem
+    ob = r.get('_obscurity_boost', 1.0)
+    vc = r.get('vote_count', 0)
+    if ob >= 2.0:
+        parts.append("this is a hidden gem with very few ratings")
+    elif ob >= 1.5 and vc < 2000:
+        parts.append("a lesser-known title that fits your taste")
+
+    # Quality / critical acclaim
+    va = r.get('tmdb_score', 0)
+    if va >= 8.0:
+        parts.append(f"highly rated at {va:.1f}/10 on TMDB")
+    elif va >= 7.5:
+        parts.append(f"well-reviewed ({va:.1f}/10)")
+
+    # Prestige
+    p = r.get('_prestige', 1.0)
+    if p >= 1.15:
+        parts.append("recognized across major film awards and curated lists")
+    elif p >= 1.05:
+        parts.append("noted in critical circles")
+
+    # Locale boost
+    lb = r.get('_locale_boost', 1.0)
+    if lb > 1.0:
+        lang = r.get('language', '')
+        lang_name = _LANG_NAMES.get(lang, lang)
+        parts.append(f"matches your preference for {lang_name} cinema")
+
+    # Assemble into prose
+    if len(parts) <= 1:
+        return parts[0] + '.' if parts else ''
+
+    lead = parts[0]
+    details = parts[1:]
+    if len(details) == 1:
+        return f"{lead} -- {details[0]}."
+    else:
+        body = ', '.join(details[:-1]) + f', and {details[-1]}'
+        return f"{lead} -- {body}."
+
+
 def print_recommendations(recs: list):
     n = len(recs)
     print(f"\n{'=' * 70}")
@@ -281,4 +372,12 @@ def print_recommendations(recs: list):
         print(f"  {rank:2d}. {r['title']}{yr}")
         print(f"      {genre_str}  |  {r['language']}  |  TMDB {r['tmdb_score']:.1f}")
         print(f"      dir: {r['director']}  |  match: {r['similarity']:.2f}")
+
+        explanation = _build_explanation(r)
+        if explanation:
+            wrapped = textwrap.fill(explanation, width=64,
+                                    initial_indent='      ',
+                                    subsequent_indent='      ')
+            print(wrapped)
+
         print()

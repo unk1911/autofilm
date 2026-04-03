@@ -14,6 +14,7 @@ MOVIELENS_URL = 'https://files.grouplens.org/datasets/movielens/ml-latest.zip'
 TOP_N = 20
 MIN_VOTE_COUNT = 300   # filter out fan-inflated scores with few votes
 MIN_TMDB_SCORE = 7.0   # quality floor
+DEFAULT_TEMPERATURE = 0.0  # 0 = deterministic (current behavior)
 
 # Language priority boosts (ISO 639-1)
 PRIORITY_LANGUAGES = {
