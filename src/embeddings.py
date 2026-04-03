@@ -94,6 +94,10 @@ def recommend(ratings: dict, top_n: int = 20, nn_predictions: 'np.ndarray | None
     it is blended in as a ±20% nudge on top of the embedding-based score.
     """
     embeddings, ids = load_embeddings()
+    if embeddings.ndim < 2 or embeddings.shape[0] == 0:
+        raise RuntimeError(
+            "Embeddings file is empty — run 'python recommend.py build-embeddings' first"
+        )
     id_to_idx = {int(mid): i for i, mid in enumerate(ids)}
 
     client = TMDBClient()
